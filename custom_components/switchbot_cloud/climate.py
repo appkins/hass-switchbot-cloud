@@ -1,8 +1,10 @@
 """Support for SwitchBot Air Conditioner remotes."""
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-import homeassistant.components.climate as FanState
+from switchbot_api import AirConditionerCommands
+
+from homeassistant.components import climate as FanState
 from homeassistant.components.climate import (
     ClimateEntity,
     ClimateEntityFeature,
@@ -12,13 +14,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from switchbot_api import AirConditionerCommands
 
+from . import SwitchbotCloudData
 from .const import DOMAIN
 from .entity import SwitchBotCloudEntity
-
-if TYPE_CHECKING:
-    from . import SwitchbotCloudData
 
 _SWITCHBOT_HVAC_MODES: dict[HVACMode, int] = {
     HVACMode.HEAT_COOL: 1,
@@ -80,8 +79,9 @@ class SwitchBotCloudAirConditioner(SwitchBotCloudEntity, ClimateEntity):
     _attr_hvac_mode = HVACMode.FAN_ONLY
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_target_temperature = 21
+    _attr_target_temperature_step = 1
+    _attr_precision = 1
     _attr_name = None
-    _enable_turn_on_off_backwards_compatibility = False
 
     async def _do_send_command(
         self,
@@ -98,7 +98,7 @@ class SwitchBotCloudAirConditioner(SwitchBotCloudEntity, ClimateEntity):
         )
         await self.send_api_command(
             AirConditionerCommands.SET_ALL,
-            parameters=f"{new_temperature},{new_mode},{new_fan_speed},on",
+            parameters=f"{int(new_temperature)},{new_mode},{new_fan_speed},on",
         )
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:

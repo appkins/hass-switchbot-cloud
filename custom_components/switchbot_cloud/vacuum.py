@@ -1,7 +1,7 @@
 """Support for SwitchBot vacuum."""
 
-from typing import Any, ClassVar
 import typing
+from typing import Any, ClassVar
 
 from homeassistant.components.vacuum import (
     STATE_CLEANING,
